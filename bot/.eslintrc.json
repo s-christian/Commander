@@ -16,6 +16,8 @@
 		"ecmaVersion": 2019
 	},
 	"rules": {
+		"@typescript-eslint/no-non-null-assertion": "off",
+		"@typescript-eslint/no-explicit-any": "off",
 		"dot-location": ["error", "property"],
 		"indent": ["error", "tab"],
 		"max-nested-callbacks": ["error", { "max": 4 }],
