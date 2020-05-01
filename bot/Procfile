@@ -1,2 +1,2 @@
-web: echo "No web server needed"
-service: npm start
+web: echo "Web process disabled: Unneeded"
+worker: npm start
