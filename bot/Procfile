@@ -1,1 +1,2 @@
+web: echo "Web process disabled as it is unneeded"
 worker: node dist/bot.js
