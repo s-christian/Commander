@@ -26,12 +26,18 @@
 	},
 	"homepage": "https://github.com/s-christian/Commander#readme",
 	"dependencies": {
-		"@types/ms": "^0.7.31",
+		"common-tags": "^1.8.0",
+		"dayjs": "^1.8.25",
 		"discord.js": "^12.2.0",
+		"discord.js-commando": "github:discordjs/Commando",
 		"dotenv": "^8.2.0",
-		"ms": "^2.1.2"
+		"ms": "^2.1.2",
+		"sqlite": "^4.0.7",
+		"sqlite3": "^4.1.1"
 	},
 	"devDependencies": {
+		"@types/common-tags": "^1.8.0",
+		"@types/ms": "^0.7.31",
 		"@types/node": "^13.13.2",
 		"@typescript-eslint/eslint-plugin": "^2.29.0",
 		"@typescript-eslint/parser": "^2.29.0",
