@@ -6,8 +6,7 @@
 	"scripts": {
 		"start": "node dist/bot.js",
 		"dev": "nodemon src/bot.ts",
-		"build": "tsc -p .",
-		"postinstall": "tsc"
+		"build": "tsc -p ."
 	},
 	"repository": {
 		"type": "git",
