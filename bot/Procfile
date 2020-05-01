@@ -1,2 +1,1 @@
-web: echo "Web process disabled: Unneeded"
-worker: npm start
+worker: node dist/bot.js
