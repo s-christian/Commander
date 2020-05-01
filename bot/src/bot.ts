@@ -3,10 +3,8 @@
 // Play music
 // Use a database and store a list of notes for users
 
-import dotenv from "dotenv";
-dotenv.config({ path: "./config/.env" }); // starts at root, not current (/src) directory
+if (process.env.NODE_ENV !== "production") require("dotenv").config({ path: "./config/.env" }); // starts at root, not current (/src) directory
 
-const token = process.env.BOT_TOKEN;
 import {
 	CommandoClient,
 	CommandoMessage,
@@ -132,4 +130,4 @@ client.setProvider(
 	}).then((db) => new SQLiteProvider(db))
 );
 
-client.login(token);
+client.login(process.env.BOT_TOKEN);
