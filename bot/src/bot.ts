@@ -3,6 +3,13 @@
 // Play music
 // Use a database and store a list of notes for users
 
+/* Heroku:
+   This project is deployed on Heroku. Since this is a Discord bot and doesn't use a web server,
+   a Heroku "Procfile" must be created to override their hosting defaults. There is a default
+   "web" option that in our Procfile we've replaced with a regular "worker". This prevents our
+   bot from going offline after 60 seconds of not being able to connect to a port.
+*/
+
 if (process.env.NODE_ENV !== "production") require("dotenv").config({ path: "./config/.env" }); // starts at root, not current (/src) directory
 
 import {
