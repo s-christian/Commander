@@ -6,7 +6,7 @@ export default class RolesCommand extends CustomCommand {
 	constructor(client: CommandoClient) {
 		super(client, {
 			name: "roles",
-			aliases: ["get-roles", "getroles", "roles-info", "rolesinfo"],
+			aliases: ["get-roles", "getroles", "roles-info", "rolesinfo", "server-roles"],
 			group: "information",
 			memberName: "roles",
 			description: "Get a list of the guild's roles",
