@@ -31,7 +31,7 @@ const prefix = "!";
 const client = new CommandoClient({
 	commandPrefix: prefix,
 	owner: process.env.BOT_OWNER_ID,
-	invite: "https://discord.gg/ZfJGpMU"
+	invite: process.env.DISCORD_SERVER_INVITE
 });
 
 // Whitelist certain channels and channel categories; the bot can only be used in these places
@@ -130,11 +130,12 @@ client.registry
 		dirname: path.join(__dirname, "commands")
 	});
 
-client.setProvider(
-	open({
-		filename: "./settings.db",
-		driver: sqlite3.Database
-	}).then((db) => new SQLiteProvider(db))
-);
+// --- Testing of database stuff ---
+// client.setProvider(
+// 	open({
+// 		filename: "./settings.db",
+// 		driver: sqlite3.Database
+// 	}).then((db) => new SQLiteProvider(db))
+// );
 
 client.login(process.env.BOT_TOKEN);

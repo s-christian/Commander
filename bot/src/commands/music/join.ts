@@ -1,6 +1,8 @@
 import { Command, CommandoClient, CommandoMessage } from "discord.js-commando";
 import { Message, GuildChannel } from "discord.js";
 
+// TESTING: Doesn't work
+
 export default class JoinCommand extends Command {
 	constructor(client: CommandoClient) {
 		super(client, {

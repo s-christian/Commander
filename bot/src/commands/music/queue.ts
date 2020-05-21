@@ -1,6 +1,8 @@
 // import { Command, CommandoClient, CommandoMessage } from "discord.js-commando";
 // import { Message, MessageEmbed } from "discord.js";
 
+// TESTING: Doesn't work
+
 // const streamOptions = {
 // 	seek: 0,
 // 	volume: 1

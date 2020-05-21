@@ -1,39 +1,48 @@
 "use strict";
 // TODO:
 // Collect server statistics for admins such as total messages sent
-// Display information on particular users
 // Play music
-// Use a MongoDB database (create another shard or whatever on my one account) and store a list of notes for users
+// Use a database and store a list of notes for users
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config({ path: "./config/.env" }); // starts at root, not current (/src) directory
-const token = process.env.BOT_TOKEN;
-// const botID = process.env.BOT_ID;
-// import Discord from "discord.js";
+if (process.env.NODE_ENV !== "production")
+    require("dotenv").config({ path: "./config/.env" }); // starts at root, not current (/src) directory
 const discord_js_commando_1 = require("discord.js-commando");
+const sqlite3_1 = __importDefault(require("sqlite3"));
+const sqlite_1 = require("sqlite");
 const path_1 = __importDefault(require("path"));
-// import ms from "ms";
-// import dayjs from "dayjs";
-// import customParseFormat from "dayjs/plugin/customParseFormat";
-// dayjs.extend(customParseFormat);
 const prefix = "!";
-// let ownerPrefix = "//";
-// let adminRole = "Admin";
-// let memberRole = "Member";
-// let muteRole = "Mute";
-const welcomeChannel = "general";
+//const welcomeChannelName = "general";
 const client = new discord_js_commando_1.CommandoClient({
     commandPrefix: prefix,
     owner: process.env.BOT_OWNER_ID,
     invite: "https://discord.gg/ZfJGpMU"
 });
-// import rolesAreHigher from "./lib/rolesAreHigher";
-// import memberChecks from "./lib/memberChecks";
-// import subarrayToString from "./lib/subarrayToString";
-// import { getUserFromMention, getMemberFromMention } from "./lib/getFromMention";
+// Whitelist certain channels and channel categories; the bot can only be used in these places
+client.dispatcher.addInhibitor((msg) => {
+    var _a, _b;
+    if (msg.channel.type === "text" && // only applies to Guild channels
+        ((_a = msg.channel.parent) === null || _a === void 0 ? void 0 : _a.name) !== "Commander" && // contains all the channels used for executing commands
+        ((_b = msg.channel.parent) === null || _b === void 0 ? void 0 : _b.name) !== "Entrance" && // used to display the command warning rather than ignore the user
+        !msg.member.roles.cache.find((role) => role.name === "Admin") && // admins exempt from all whitelist restrictions
+        msg.member !== msg.guild.owner // guild owner exempt from all whitelist restrictions
+    )
+        return "Commands cannot be used outside whitelisted channels.";
+    else
+        return false;
+});
+// Disallow users from re-executing the membership command if they're already members
+client.dispatcher.addInhibitor((msg) => {
+    if (msg.channel.type === "text" && // in a guild
+        msg.content === "cardboard" && // user entered secret phrase
+        msg.member.roles.highest.position > 0 // but they're already a member
+    )
+        return "User is already a member.";
+    else
+        return false;
+});
 client
     .on("error", console.error)
     .on("warn", console.warn)
@@ -80,27 +89,34 @@ client
 			${guild ? `in guild ${guild.name} (${guild.id})` : "globally"}.
 		`);
 });
-client.on("guildMemberAdd", (member) => {
-    const channel = member.guild.channels.cache.get(welcomeChannel);
-    if (channel) {
-    }
-});
+// .on("guildMemberAdd", (member: GuildMember) => {
+// 	const welcomeChannel = member.guild.channels.cache.find(
+// 		(channel) => channel.name === welcomeChannelName
+// 	);
+// 	//if (welcomeChannel) send a welcome message!
+// });
 client.registry
     .registerDefaultTypes()
     .registerDefaultGroups()
     .registerDefaultCommands({ unknownCommand: false })
     .registerGroups([
-    ["information", "Information"],
-    ["main", "Main"],
-    ["music", "Music"],
-    ["mod", "Mod"]
-    // { id: "information", name: "Information" },
-    // { id: "main", name: "Main" },
-    // { id: "music", name: "Music" },
-    // { id: "mod", name: "Mod", guarded: true }
+    { id: "information", name: "Information" },
+    { id: "main", name: "Main" },
+    { id: "music", name: "Music" },
+    { id: "math", name: "Math" },
+    { id: "mod", name: "Mod", guarded: true },
+    { id: "misc", name: "Miscellaneous" }
 ])
-    .registerCommandsIn(path_1.default.join(__dirname, "commands"));
-console.log(client.registry.commandsPath);
-console.log(client.registry.groups.keys());
-console.log(client.registry.commands.keys());
-client.login(token);
+    // https://github.com/discordjs/Commando/issues/268#issuecomment-574629535
+    // "require-all" is internally used by Commando, but by default only requires files with the extensions ".js" or ".json".
+    // This custom regex filter makes it accept the TypeScript files too.
+    // This allows you to not have to manually build the application every time on dev, so you can still use nodemon.
+    .registerCommandsIn({
+    filter: /^([^.].*)\.(js|ts)$/,
+    dirname: path_1.default.join(__dirname, "commands")
+});
+client.setProvider(sqlite_1.open({
+    filename: "./settings.db",
+    driver: sqlite3_1.default.Database
+}).then((db) => new discord_js_commando_1.SQLiteProvider(db)));
+client.login(process.env.BOT_TOKEN);

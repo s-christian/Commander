@@ -19,8 +19,7 @@ export default class InviteCommand extends CustomCommand {
 	}
 
 	async run(message: CommandoMessage): Promise<Message | Message[]> {
-		const inviteString =
-			"__Follow this link to invite me to your server!__ - https://discordapp.com/api/oauth2/authorize?client_id=675849072950902883&permissions=1543367927&scope=bot";
+		const inviteString = `__Follow this link to invite me to your server!__ - ${process.env.DISCORD_BOT_INVITE}`;
 		if (message.channel.type === "dm") return message.say(inviteString);
 		// if it's not already a DM, create a dm channel
 		else {

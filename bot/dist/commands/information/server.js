@@ -3,32 +3,82 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const discord_js_commando_1 = require("discord.js-commando");
-const dayjs_1 = __importDefault(require("dayjs"));
-class ServerCommand extends discord_js_commando_1.Command {
+const CustomCommand_1 = __importDefault(require("../../lib/CustomCommand"));
+const discord_js_1 = require("discord.js");
+class ServerCommand extends CustomCommand_1.default {
     constructor(client) {
         super(client, {
             name: "server",
-            aliases: ["server-info"],
+            aliases: ["server-info", "guild", "guild-info"],
             group: "information",
             memberName: "server-info",
-            description: "Gets information about the server.",
+            description: "Get information about the server.",
+            examples: ["!server [publicServerID?]", "!server", "!server id"],
+            clientPermissions: ["MANAGE_GUILD"],
             throttling: {
                 usages: 1,
                 duration: 5
             },
-            guildOnly: true // the server command can only be used within guilds
+            argsType: "single"
         });
     }
-    run(message) {
-        var _a, _b, _c, _d, _e, _f, _g;
-        return message.say(`Server name: ${(_a = message.guild) === null || _a === void 0 ? void 0 : _a.name}\n` +
-            `Server description: ${((_b = message.guild) === null || _b === void 0 ? void 0 : _b.description) || ""}\n` +
-            `Date created: ${dayjs_1.default((_c = message.guild) === null || _c === void 0 ? void 0 : _c.createdAt).format("MM/DD/YYYY, hh:mm:ss")}\n` +
-            `Total members: ${(_d = message.guild) === null || _d === void 0 ? void 0 : _d.memberCount}\n` +
-            `Server owner: ${(_f = (_e = message.guild) === null || _e === void 0 ? void 0 : _e.owner) === null || _f === void 0 ? void 0 : _f.user.tag}\n`, {
-            files: [`${(_g = message.guild) === null || _g === void 0 ? void 0 : _g.iconURL({ size: 1024, format: "png", dynamic: true })}`]
-        });
+    async run(message, guildID) {
+        var _a;
+        let guild;
+        if (guildID) {
+            try {
+                guild = await this.client.fetchGuildPreview(guildID);
+            }
+            catch (error) {
+                guild = undefined;
+            }
+            if (!guild)
+                return message.say("Either the guild you are searching for is not public, or you did not provide a valid guild ID.");
+        }
+        else {
+            if (message.channel.type === "dm")
+                return message.say("You must either provide a guild ID, or use this command within a guild.");
+            guild = message.guild;
+        }
+        const commanderAvatar = this.client.user.displayAvatarURL({ size: 128, format: "png" });
+        const guildImage = guild.iconURL({ size: 1024, format: "png", dynamic: true }) || undefined;
+        // Base embed, same information for both a Guild and GuildPreview
+        const serverInfoEmbed = new discord_js_1.MessageEmbed()
+            .setAuthor(this.client.user.username, commanderAvatar)
+            .setTimestamp()
+            .setTitle(guild.name)
+            .setDescription(`(ID: ${guild.id})`)
+            .addField("Description", guild.description || "*None*");
+        if (guildImage)
+            serverInfoEmbed.setThumbnail(guildImage);
+        // GuildPreview information
+        if (guild instanceof discord_js_1.GuildPreview) {
+            serverInfoEmbed
+                .setColor("PURPLE")
+                .addField("Online Members", guild.approximatePresenceCount, true)
+                .addField("Total Members", guild.approximateMemberCount, true)
+                .addField("Number of Emojis", guild.emojis.size)
+                .setFooter("Guild preview");
+        }
+        // Full Guild information
+        else {
+            const serverAgeMs = Date.now() - guild.createdAt.getTime();
+            const serverAgeDays = Math.floor(serverAgeMs / 86400000);
+            const region = guild.region.split("-");
+            // "us-east" => "US East"
+            const formattedRegion = region[0].toUpperCase() + " " + region[1][0].toUpperCase() + region[1].slice(1);
+            serverInfoEmbed
+                .setColor("GREEN")
+                .addField("Online Members", guild.presences.cache.filter((p) => p.status === "online").size, true)
+                .addField("Total Members", guild.memberCount, true)
+                .addField("Members in VC", guild.voiceStates.cache.size, true)
+                .addField("Number of Roles", guild.roles.cache.size)
+                .addField("Guild Creation Date", guild.createdAt.toLocaleString(), true)
+                .addField("Server Age", `${serverAgeDays} day(s)`, true)
+                .addField("Region", formattedRegion, true)
+                .addField("Owner", `<@${(_a = guild.owner) === null || _a === void 0 ? void 0 : _a.id}>`);
+        }
+        return message.say(serverInfoEmbed);
     }
 }
 exports.default = ServerCommand;
